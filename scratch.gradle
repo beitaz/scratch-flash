@@ -45,9 +45,10 @@ dependencies {
     flexSDK group: 'org.apache', name: 'apache-flex-sdk', version: '4.15.0', ext: 'zip'
     external group: 'macromedia.com', name: 'playerglobal', version: playerVersion.replace('.', '_'), ext: 'swc'
     merged files(
-            "${commonDir}/libs/as3corelib.swc",
-            "${commonDir}/libs/blooddy_crypto.swc",
-            "${commonDir}/libs/grabcut.swc"
+        "${commonDir}/libs/playerglobal_${playerVersion}.swc",
+        "${commonDir}/libs/as3corelib.swc",
+        "${commonDir}/libs/blooddy_crypto.swc",
+        "${commonDir}/libs/grabcut.swc"
 
     )
 }

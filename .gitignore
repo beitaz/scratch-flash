@@ -11,3 +11,6 @@
 .flexLibProperties
 .project
 local.properties
+
+# Ingore VSCode configuration directory
+.vscode
