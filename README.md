@@ -56,15 +56,16 @@
     ```
   * 修改项目属性: 修改 `项目属性` -> `Flex 编译器` 中的 `编辑器选项`,只需要 `生成可访问的 SWF 文件` 和 `启用严格类型检查`,同时在 `附加的编辑器参数` 中添加编译参数 `-locale zh_CN -swf-version=19 -default-size=1024,768 -define+=SCRATCH::allow3d,false -define+=SCRATCH::revision,'20180101'`
   * 检查构建路径: 确保 `项目属性` -> `Flex 构建路径` -> `框架链接` 设置为 `合并到代码中`,确认输入输出目录.
-  * 指定项目构建模块: 修改 `项目属性` -> `Flex 模块` -> `添加`, 修改 `源代码` 指向 `src/Scratch.as`, 输出大小选择 `不优化` 即可(非 AS 开发者,未掌握优化配置).
+  * 指定项目构建模块: `src/Scratch.as` 上右键 -> `设置为默认应用程序`
 
   **提示:** 可取消 `FB 顶部菜单 -> 项目 -> 自动构建` 的勾选状态,加快 FB 响应速度.
 
 ---
 
-### 修改顶部菜单
+### 顶部菜单
 
 #### 修改颜色
+
 
 ```actionscript
 // 修改 src/CSS.as 中的 topBarColor 默认值即可改变颜色
@@ -73,7 +74,15 @@ public static const topBarColor_default:int = 0x9C9EA2;
 
 **提示:** 颜色转换规则 `#000000` => `0x000000`, 且必须六位写全.
 
-### 资源加载
+#### 添加项目
+
+---
+
+### 资源相关
+
+资源目录 `media` 包含 `README.md` 提示信息, 可执行 `python download-sprite-media.py` 下载角色和多媒体资源; 执行 `python media/libs/generate-costume-library.py` 下载自定义库.
+
+#### 资源加载
 
 官方默认配置使用 CDN 加载资源,导致无法加载.提供两种方案:
 
@@ -82,20 +91,25 @@ public static const topBarColor_default:int = 0x9C9EA2;
   ```actionscript
   // 加载图片资源
   public function getAsset(md5:String, whenDone:Function):URLLoader {
-    var url:String = URLs.assetCdnPrefix + URLs.internalAPI + 'asset/' + md5 + '/get/';
+    // var url:String = URLs.assetCdnPrefix + URLs.internalAPI + 'asset/' + md5 + '/get/';
+    var url:String = 'media/' + md5;
     return serverGet(url, whenDone);
   }
   // 加载声音资源
   public function getMediaLibrary(libraryType:String, whenDone:Function):URLLoader {
-    var url:String = getCdnStaticSiteURL() + 'medialibraries/' + libraryType + 'Library.json';
+    // var url:String = getCdnStaticSiteURL() + 'medialibraries/' + libraryType + 'Library.json';
+    var url:String = 'media/libs' + libraryType + 'Library.json';
     return serverGet(url, whenDone);
   }
   // 加载其他资源
   public function getThumbnail(idAndExt:String, w:int, h:int, whenDone:Function):URLLoader {
-    var url:String = getCdnStaticSiteURL() + 'medialibrarythumbnails/' + idAndExt;
+    // var url:String = getCdnStaticSiteURL() + 'medialibrarythumbnails/' + idAndExt;
+    var url:String = 'media/' + idAndExt;
     return downloadThumbnail(url, w, h, whenDone);
   }
   ```
+
+  **注意:** 因为离线版问题,这里并不能马上看到效果.需要将编译结果 Scratch.swf 复制覆盖官方离线版目录中,再从官方图标点开.
 
 * 加载自定义 CDN 资源: 修改 `src/util/Server.as` 中设置 CDN 方法
 
@@ -105,10 +119,69 @@ public static const topBarColor_default:int = 0x9C9EA2;
   }
   ```
 
+#### 添加资源类别
+
+* 将自定义类别添加到 `src/ui/media/MediaLibrary.as` 中
+
+  ```actionscript
+  // 角色库 - 分类
+  private static const costumeCategories:Array = ['All', 'Animals', 'Fantasy', 'Letters', 'People', 'Things', 'Transportation'];
+  // 扩展库 - 分类
+  private static const extensionCategories:Array = ['All', 'Hardware'];
+  // 声音库 - 分类
+  private static const soundCategories:Array = [
+    'All', 'Animal', 'Effects', 'Electronic', 'Human', 'Instruments',
+    'Music Loops', 'Musical Notes', 'Percussion', 'Vocals'];
+  // 背景库 - 分类
+  private static const backdropCategories:Array = ['All', 'Indoors', 'Outdoors', 'Other'];
+  // 背景库 - 主题
+  private static const backdropThemes:Array = ['Castle', 'City', 'Flying', 'Holiday', 'Music and Dance', 'Nature', 'Space', 'Sports', 'Underwater'];
+  // 角色库 - 主题
+  private static const costumeThemes:Array = ['Castle', 'City', 'Dance', 'Dress-Up', 'Flying', 'Holiday', 'Music', 'Space', 'Sports', 'Underwater', 'Walking'];
+  // 角色库 - 类型
+  private static const imageTypes:Array = ['All', 'Bitmap', 'Vector'];
+  ```
+
+* 可修改资源类型有`sprite`,`sound`,`backdrop`三种,可添加栏目有如下几种:
+  * `costumeCategories`   对应:  `角色库 / 分类`
+  * `costumeThemes`       对应:  `角色库 / 主题`
+  * `imageTypes`          对应:  `角色库 / 类型`
+  * `backdropCategories`  对应:  `背景库 / 分类`
+  * `backdropThemes`      对应:  `背景库 / 主题`
+  * `soundCategories`     对应:  `声音库 / 分类`
+  * `extensionCategories` 对应:  `扩展库 / 分类`
+
+* 操作步骤:
+  * [可选] 添加栏目
+  * 添加资源文件(图片,声音)
+  * 资源配置文件中 `media/libs/{sprite,sound,backdrop}Library.json` 中添加自定义资源条目
+
+  ```json
+  [{
+    "name": "Z-Story",
+    "md5": "4a0f2901c77f3b9ef44b61b5e8fc3e68.json",
+    "type": "sprite",
+    "tags": ["letters", "drawing", "vector"],
+    "info": [0, 3, 1]
+  }]
+  ```
+
+  * 添加资源配置文件 `media/4a0f2901c77f3b9ef44b61b5e8fc3e68.json`
+
+  **提示:** JSON 格式模板为 `{ "name": ResourceDisplayName, "md5": ResourceFileName,   "type": ResourceCategory,  "tags": MountPoint, "info": Array }`.角色 info 使用 `md5.json` 中的 `objName` 值.
+
+  * name 界面显示名称 string
+  * md5 真实资源文件名称 md5.json
+  * type 资源所属类型 [sprite, sound, backdrop]
+  * tags 资源所属栏目 [All, Other]
+  * info 资源编号数组
+
+---
+
 ### 发布版本
 
 `FB 顶部菜单` -> `项目` -> `导出发行版...` -> `确定` 即可导出自己的 scratch.swf
-
+覆盖旧文件: `cp /Users/quoyi/Workspace/scratch/scratch-flash-develop/bin-release/Scratch.swf /Applications/Scratch\ 2.app/Contents/Resources/`
 
 
 ---

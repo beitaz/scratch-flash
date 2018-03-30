@@ -39,7 +39,7 @@ public class MediaLibrary extends Sprite {
 	private static const backdropCategories:Array = [
 		'All', 'Indoors', 'Outdoors', 'Other'];
 	private static const costumeCategories:Array = [
-		'All', 'Animals', 'Fantasy', 'Letters', 'People', 'Things', 'Transportation'];
+		'All', 'Animals', 'Fantasy', 'Letters', 'People', 'Things', 'Transportation', 'Test'];
 	private static const extensionCategories:Array = [
 		'All', 'Hardware'];
 	private static const soundCategories:Array = [

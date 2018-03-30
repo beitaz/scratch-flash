@@ -258,17 +258,21 @@ public class Server implements IServer {
 	// -----------------------------
 	// Asset API
 	//------------------------------
+	// 加载静态资源
 	public function getAsset(md5:String, whenDone:Function):URLLoader {
 //		if (BackpackPart.localAssets[md5] && BackpackPart.localAssets[md5].length > 0) {
 //			whenDone(BackpackPart.localAssets[md5]);
 //			return null;
 //		}
-		var url:String = URLs.assetCdnPrefix + URLs.internalAPI + 'asset/' + md5 + '/get/';
+		// var url:String = URLs.assetCdnPrefix + URLs.internalAPI + 'asset/' + md5 + '/get/';
+		var url:String = 'media/' + md5;
 		return serverGet(url, whenDone);
 	}
 
+	// 加载多媒体资源
 	public function getMediaLibrary(libraryType:String, whenDone:Function):URLLoader {
-		var url:String = getCdnStaticSiteURL() + 'medialibraries/' + libraryType + 'Library.json';
+		// var url:String = getCdnStaticSiteURL() + 'medialibraries/' + libraryType + 'Library.json';
+		var url:String = 'media/libs/' + libraryType + 'Library.json';
 		return serverGet(url, whenDone);
 	}
 
@@ -314,8 +318,10 @@ public class Server implements IServer {
 		return result;
 	}
 
+	// 加载其他资源
 	public function getThumbnail(idAndExt:String, w:int, h:int, whenDone:Function):URLLoader {
-		var url:String = getCdnStaticSiteURL() + 'medialibrarythumbnails/' + idAndExt;
+		// var url:String = getCdnStaticSiteURL() + 'medialibrarythumbnails/' + idAndExt;
+		var url:String = 'media/' + idAndExt;
 		return downloadThumbnail(url, w, h, whenDone);
 	}
 
