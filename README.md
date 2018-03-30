@@ -2,8 +2,6 @@
 
 ## 项目准备
 
----
-
 * Fork [官方仓库](https://github.com/LLK/scratch-flash) 并配置本地代码
 
   ```shell
@@ -17,7 +15,7 @@
   git push origin develop  # 推送到自己的 github 仓库
   ```
 
-* 使用 gradle 编译项目(**未配置包含库文件到编译结果中,暂时不建议使用**)
+* 使用 gradle 编译项目(**未配置包含库文件到编译结果中,暂时不建议使用**)
   * 从 [一个逗比](https://www.adobe.com/support/flashplayer/debug_downloads.html)
    下载 `playerglobal_10.2.swc` 和 `playerglobal_11.6.swc` 并放在 `libs/` 下 [附:版本列表](https://helpx.adobe.com/flash-player/kb/archived-flash-player-versions.html)
   * [可选配置] 修改 `build.properties` 中的 `FLEX_HOME` 值为 FlexSDK 安装路径
@@ -56,9 +54,14 @@
 
   **提示:** 可取消 `FB 顶部菜单 -> 项目 -> 自动构建` 的勾选状态,加快 FB 响应速度.
 
-## 离线模式
+* 配置 Flash Builder 4.7 调试
 
----
+  * [可选] 卸载已安装的 `Flash Player` (非 Debugger 版) [官方教程 Win](https://helpx.adobe.com/flash-player/kb/uninstall-flash-player-windows.html) | [Mac](https://helpx.adobe.com/flash-player/kb/uninstall-flash-player-mac-os.html)
+  * 下载 `Flash Player Debugger` 独立版 `flashplayer_29_sa_debug`
+  * 解压文件,修改 `FB 首选项` -> `Flash Builder` -> `调试` -> `独立 Adobe Flash Player(调试版本)` 的值指向解压后文件: `/Applications/Flash Player.app`
+  * 设置断点,启动调试模式
+
+## 离线模式
 
 ### 舞台大小
 
@@ -82,8 +85,8 @@
 public function updateInfo():void {
   ...
   // 离线模式 ? 舞台全屏 : 正常(小舞台)
-  if (isOffline) {
-    stage.displayState = enterPresentation ? StageDisplayState.FULL_SCREEN_INTERACTIVE : StageDisplayState.NORMAL;
+  if (Scratch.app.isOffline) {
+    info.userAgent = 'Scratch 2.0 Offline Editor'; // 这个不是 swf 范围内,无法动态修改
   }
   ...
 }
@@ -98,7 +101,7 @@ protected function fixLayout():void {
   ...
   // cursor tool buttons
   var space:int = 3;
-  copyTool.x = app.isOffline ? 493 : 427;
+  copyTool.x = app.isOffline ? 493 : 427; // 设置工具图标按钮的 x 坐标
   cutTool.x = copyTool.right() + space;
   growTool.x = cutTool.right() + space;
   shrinkTool.x = growTool.right() + space;
@@ -108,25 +111,75 @@ protected function fixLayout():void {
 }
 ```
 
-## 顶部菜单
+### 语言选择
 
----
+编译结果无 `locale` 目录,需要手动复制.不需要那么多, `zh-cn.po` 和 `lang_list.txt` 就够了.同时还要修改 `lang_list.txt` 中的可用语言列表.
+
+* 设置默认中文 `src/translation/Translator.as`
+
+  ```actionscript
+  public static var currentLang:String = 'en'; // 改为 'zh-cn'
+  ```
+
+* 设置默认字体大小 `src/translation/Translator.as`
+
+  ```actionscript
+  Block.setFonts(10, 9, true, 0); // default font settings
+  ```
+
+* 设置首选中文字体 `src/svgeditor/DrawProperties.as`
+
+  ```actionscript
+  private static function setFontsFor(lang:String):void {
+    ...
+    public var fontName:String = 'Helvetica';
+    ...
+  }
+  ```
+
+## 顶部菜单
 
 ### 修改颜色
 
+修改 `src/CSS.as`
 
 ```actionscript
-// 修改 src/CSS.as 中的 topBarColor 默认值即可改变颜色
 public static const topBarColor_default:int = 0x9C9EA2;
 ```
 
 **提示:** 颜色转换规则 `#000000` => `0x000000`, 且必须六位写全.
 
-### 添加项目
+### 添加菜单项目
+
+### 修改默认格式 *.sb2
+
+* 修改加载项目的文件 `src/scratch/ScratchRuntime.as`
+
+  ```actionscript
+  public function selectProjectFile():void {
+    ...
+      var filter:FileFilter;
+      // 选择文件时,过滤文件类型
+      if (Scratch.app.isExtensionDevMode) {
+        filter = new FileFilter('ScratchX Project', '*.sbx;*.sb;*.sb2');
+      } else {
+        filter = new FileFilter('Scratch Project', '*.sb2;*.sb');
+      }
+      Scratch.loadSingleFile(fileLoadHandler, filter);
+    }
+    ...
+  }
+  ```
+
+* 修改保存项目的文件 `src/Scratch.as`
+
+  ```actionscript
+  public function exportProjectToFile(fromJS:Boolean = false, saveCallback:Function = null):void {
+    ...
+  }
+  ```
 
 ## 资源相关
-
----
 
 编译结果中未包含 `media/*`, 需要手动复制添加.该目录包含各种图片声音资源和 `README.md`. 可执行 `python download-sprite-media.py` 下载角色和多媒体资源; 执行 `python media/libs/generate-costume-library.py` 下载自定义库.
 
@@ -167,6 +220,7 @@ public static const topBarColor_default:int = 0x9C9EA2;
   }
   ```
 
+loadSingleGithubURL
 ### 添加资源类别
 
 * 将自定义类别添加到 `src/ui/media/MediaLibrary.as` 中
@@ -242,7 +296,7 @@ public static const topBarColor_default:int = 0x9C9EA2;
       m.addItem('Marker');
       m.addItem('Mystery');
       m.addItem('Scratch');
-      m.addItem('Wawa'); // 必须是注册的 fontName
+      m.addItem('Wawa'); // 必须是注册的 fontName
       m.showOnStage(Scratch.app.stage);
     }
     ...
@@ -250,8 +304,6 @@ public static const topBarColor_default:int = 0x9C9EA2;
   ```
 
 ### 版本发布
-
----
 
 * 导出发行版: `FB 顶部菜单` -> `项目` -> `导出发行版...` -> `确定`
 

@@ -32,6 +32,7 @@ import flash.events.*;
 import flash.text.*;
 import flash.system.Capabilities;
 import flash.utils.ByteArray;
+import flash.utils.Timer;
 import flash.net.FileReference;
 import blocks.Block;
 import filters.FilterPack;
@@ -753,6 +754,10 @@ public class ScratchStage extends ScratchObj {
 	}
 
 	public function updateInfo():void {
+		// function changeTitle(newTitle:String):void {
+		// 	info.userAgent = newTitle;
+		// 	// info.userAgent = 'Scratch 2.0 Offline Editor';
+		// }
 		info.scriptCount = scriptCount();
 		info.spriteCount = spriteCount();
 		info.flashVersion = Capabilities.version;
@@ -774,6 +779,9 @@ public class ScratchStage extends ScratchObj {
 		// 离线模式标题
 		if (Scratch.app.isOffline) {
 			info.userAgent = 'Scratch 2.0 Offline Editor';
+			// var timer:Timer = new Timer(5000, 1);
+			// timer.addEventListener(TimerEvent.TIMER, changeTitle('测试'));
+			// timer.start();
 		}
 		else if (Scratch.app.jsEnabled) {
 			Scratch.app.externalCall('window.navigator.userAgent.toString', function(userAgent:String):void {

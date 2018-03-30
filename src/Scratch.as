@@ -1032,6 +1032,7 @@ public class Scratch extends Sprite {
 	// Translations utilities
 	//------------------------------
 
+	// 修改语言后,更新界面字符串
 	public function translationChanged():void {
 		// The translation has changed. Fix scripts and update the UI.
 		// directionChanged is true if the writing direction (e.g. left-to-right) has changed.
