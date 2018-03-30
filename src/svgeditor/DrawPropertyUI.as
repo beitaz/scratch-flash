@@ -336,6 +336,7 @@ public class DrawPropertyUI extends Sprite {
 		return ImageEdit.buttonFrame(icon, isOn, buttonSize);
 	}
 
+	// 添加字体选择菜单项
 	private function makeFontUI():void {
 		function fontMenu():void {
 			var m:Menu = new Menu(fontSelected);
@@ -346,6 +347,8 @@ public class DrawPropertyUI extends Sprite {
 			m.addItem('Marker');
 			m.addItem('Mystery');
 			m.addItem('Scratch');
+			// 添加字体选项配置
+			m.addItem('Wawa'); // 必须是注册的 fontName
 			m.showOnStage(Scratch.app.stage);
 		}
 		function fontSelected(fontName:String):void {

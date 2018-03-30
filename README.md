@@ -176,6 +176,31 @@ public static const topBarColor_default:int = 0x9C9EA2;
   * tags 资源所属栏目 [All, Other]
   * info 资源编号数组
 
+#### 添加字体
+
+* 将字体文件复制到 `src/assets/fonts/` 目录中
+
+* 注册字体 `src/assets/Resources.as`
+
+```actionscript
+[Embed(source='fonts/WawaSC-Regular.otf', fontName='Wawa', embedAsCFF = 'false', advancedAntiAliasing = 'true')] private static const Font7:Class;
+```
+
+* 使用字体 `src/svgeditor/DrawPropertyUI.as`
+
+```actionscript
+private function makeFontUI():void {
+  ...
+    m.addItem('Marker');
+    m.addItem('Mystery');
+    m.addItem('Scratch');
+    m.addItem('Wawa'); // 必须是注册的 fontName
+    m.showOnStage(Scratch.app.stage);
+  }
+  ...
+}
+```
+
 ---
 
 ### 发布版本

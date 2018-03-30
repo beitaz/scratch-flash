@@ -14,3 +14,6 @@ local.properties
 
 # Ingore VSCode configuration directory
 .vscode
+
+# Ingore cusotme font file
+src/assets/fonts/WawaSC-Regular.otf
