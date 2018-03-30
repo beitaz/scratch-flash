@@ -771,6 +771,7 @@ public class ScratchStage extends ScratchObj {
 		}
 
 		delete info.userAgent;
+		// 离线模式标题
 		if (Scratch.app.isOffline) {
 			info.userAgent = 'Scratch 2.0 Offline Editor';
 		}

@@ -1,12 +1,8 @@
-# 笔记
+# 二次开发
 
-**修改 `Scratch.as` 中的 isOffline = false 会只显示 stage 舞台。**
-
-## 二次开发
+## 项目准备
 
 ---
-
-### 项目准备
 
 * Fork [官方仓库](https://github.com/LLK/scratch-flash) 并配置本地代码
 
@@ -60,11 +56,63 @@
 
   **提示:** 可取消 `FB 顶部菜单 -> 项目 -> 自动构建` 的勾选状态,加快 FB 响应速度.
 
+## 离线模式
+
 ---
 
-### 顶部菜单
+### 舞台大小
 
-#### 修改颜色
+修改 `src/Scratch.as` 文件:
+
+```actionscript
+  public function presentationModeWasChanged(enterPresentation:Boolean):void {
+    ...
+    if (isOffline) {
+      stage.displayState = enterPresentation ? StageDisplayState.FULL_SCREEN_INTERACTIVE : StageDisplayState.NORMAL;
+    }
+    ...
+  }
+```
+
+### 窗口标题
+
+修改 `src/scratch/ScratchStage.as` 文件:
+
+```actionscript
+public function updateInfo():void {
+  ...
+  // 离线模式 ? 舞台全屏 : 正常(小舞台)
+  if (isOffline) {
+    stage.displayState = enterPresentation ? StageDisplayState.FULL_SCREEN_INTERACTIVE : StageDisplayState.NORMAL;
+  }
+  ...
+}
+```
+
+### 工具位置
+
+修改 `src/ui/parts/TopBarPart.as` 文件(最好是根据全局大小计算 x 轴位置):
+
+```actionscript
+protected function fixLayout():void {
+  ...
+  // cursor tool buttons
+  var space:int = 3;
+  copyTool.x = app.isOffline ? 493 : 427;
+  cutTool.x = copyTool.right() + space;
+  growTool.x = cutTool.right() + space;
+  shrinkTool.x = growTool.right() + space;
+  helpTool.x = shrinkTool.right() + space;
+  copyTool.y = cutTool.y = shrinkTool.y = growTool.y = helpTool.y = buttonY - 3;
+  ...
+}
+```
+
+## 顶部菜单
+
+---
+
+### 修改颜色
 
 
 ```actionscript
@@ -74,15 +122,15 @@ public static const topBarColor_default:int = 0x9C9EA2;
 
 **提示:** 颜色转换规则 `#000000` => `0x000000`, 且必须六位写全.
 
-#### 添加项目
+### 添加项目
+
+## 资源相关
 
 ---
 
-### 资源相关
+编译结果中未包含 `media/*`, 需要手动复制添加.该目录包含各种图片声音资源和 `README.md`. 可执行 `python download-sprite-media.py` 下载角色和多媒体资源; 执行 `python media/libs/generate-costume-library.py` 下载自定义库.
 
-资源目录 `media` 包含 `README.md` 提示信息, 可执行 `python download-sprite-media.py` 下载角色和多媒体资源; 执行 `python media/libs/generate-costume-library.py` 下载自定义库.
-
-#### 资源加载
+### 资源加载
 
 官方默认配置使用 CDN 加载资源,导致无法加载.提供两种方案:
 
@@ -119,7 +167,7 @@ public static const topBarColor_default:int = 0x9C9EA2;
   }
   ```
 
-#### 添加资源类别
+### 添加资源类别
 
 * 将自定义类别添加到 `src/ui/media/MediaLibrary.as` 中
 
@@ -156,15 +204,15 @@ public static const topBarColor_default:int = 0x9C9EA2;
   * 添加资源文件(图片,声音)
   * 资源配置文件中 `media/libs/{sprite,sound,backdrop}Library.json` 中添加自定义资源条目
 
-  ```json
-  [{
-    "name": "Z-Story",
-    "md5": "4a0f2901c77f3b9ef44b61b5e8fc3e68.json",
-    "type": "sprite",
-    "tags": ["letters", "drawing", "vector"],
-    "info": [0, 3, 1]
-  }]
-  ```
+    ```json
+    [{
+      "name": "Z-Story",
+      "md5": "4a0f2901c77f3b9ef44b61b5e8fc3e68.json",
+      "type": "sprite",
+      "tags": ["letters", "drawing", "vector"],
+      "info": [0, 3, 1]
+    }]
+    ```
 
   * 添加资源配置文件 `media/4a0f2901c77f3b9ef44b61b5e8fc3e68.json`
 
@@ -176,38 +224,38 @@ public static const topBarColor_default:int = 0x9C9EA2;
   * tags 资源所属栏目 [All, Other]
   * info 资源编号数组
 
-#### 添加字体
+### 添加字体
 
 * 将字体文件复制到 `src/assets/fonts/` 目录中
 
 * 注册字体 `src/assets/Resources.as`
 
-```actionscript
-[Embed(source='fonts/WawaSC-Regular.otf', fontName='Wawa', embedAsCFF = 'false', advancedAntiAliasing = 'true')] private static const Font7:Class;
-```
+  ```actionscript
+  [Embed(source='fonts/WawaSC-Regular.otf', fontName='Wawa', embedAsCFF = 'false', advancedAntiAliasing = 'true')] private static const Font7:Class;
+  ```
 
 * 使用字体 `src/svgeditor/DrawPropertyUI.as`
 
-```actionscript
-private function makeFontUI():void {
-  ...
-    m.addItem('Marker');
-    m.addItem('Mystery');
-    m.addItem('Scratch');
-    m.addItem('Wawa'); // 必须是注册的 fontName
-    m.showOnStage(Scratch.app.stage);
+  ```actionscript
+  private function makeFontUI():void {
+    ...
+      m.addItem('Marker');
+      m.addItem('Mystery');
+      m.addItem('Scratch');
+      m.addItem('Wawa'); // 必须是注册的 fontName
+      m.showOnStage(Scratch.app.stage);
+    }
+    ...
   }
-  ...
-}
-```
+  ```
+
+### 版本发布
 
 ---
 
-### 发布版本
+* 导出发行版: `FB 顶部菜单` -> `项目` -> `导出发行版...` -> `确定`
 
-`FB 顶部菜单` -> `项目` -> `导出发行版...` -> `确定` 即可导出自己的 scratch.swf
-覆盖旧文件: `cp /Users/quoyi/Workspace/scratch/scratch-flash-develop/bin-release/Scratch.swf /Applications/Scratch\ 2.app/Contents/Resources/`
-
+* 覆盖旧文件: `cp $HOME/Workspace/scratch/scratch-flash-develop/bin-release/Scratch.swf /Applications/Scratch\ 2.app/Contents/Resources/`
 
 ---
 

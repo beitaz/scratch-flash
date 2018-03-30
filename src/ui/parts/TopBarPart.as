@@ -150,7 +150,7 @@ public class TopBarPart extends UIPart {
 		editMenu.y = buttonY;
 		nextX += editMenu.width + buttonSpace;
 
-		// cursor tool buttons
+		// 设置鼠标工具位置 cursor tool buttons
 		var space:int = 3;
 		copyTool.x = app.isOffline ? 493 : 427;
 		cutTool.x = copyTool.right() + space;

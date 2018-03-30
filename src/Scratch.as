@@ -163,6 +163,7 @@ public class Scratch extends Sprite {
 	}
 
 	protected function initialize():void {
+		// 本地运行时 loaderInfo.url = file:///Users/quoyi/Workspace/scratch/scratch-flash-develop/bin-debug/Scratch.swf
 		isOffline = !URLUtil.isHttpURL(loaderInfo.url);
 		hostProtocol = URLUtil.getProtocol(loaderInfo.url);
 
@@ -651,6 +652,7 @@ public class Scratch extends Sprite {
 				if (jsEnabled) externalCall('tip_bar_api.show');
 			}
 		}
+		// 离线模式 ? 舞台全屏 : 正常(小舞台)
 		if (isOffline) {
 			stage.displayState = enterPresentation ? StageDisplayState.FULL_SCREEN_INTERACTIVE : StageDisplayState.NORMAL;
 		}

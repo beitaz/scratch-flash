@@ -68,6 +68,9 @@ public class Server implements IServer {
 	// No default URLs
 	protected function setDefaultURLs():void {}
 
+	/**
+	 * 覆盖默认服务器 URL 地址
+	 */
 	public function overrideURLs(overrides:Object):void {
 		var forceProtocol:String;
 		var swfURL:String = Scratch.app.loaderInfo.url;
