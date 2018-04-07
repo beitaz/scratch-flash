@@ -61,6 +61,10 @@
   * 解压文件,修改 `FB 首选项` -> `Flash Builder` -> `调试` -> `独立 Adobe Flash Player(调试版本)` 的值指向解压后文件: `/Applications/Flash Player.app`
   * 设置断点,启动调试模式
 
+  **提示 1:** `Error 2060: 安全沙箱冲突:ExternalInterface 调用者 ... 不能访问 ...`  需要设置访问信任: `$HOME/Library/Preferences/Macromedia/Flash\ Player/\#Security/FlashPlayerTrust` 中添加 App 路径 `path_to_bin_bebug/Scratch.swf`
+
+  **提示 2:** `Error: Calling JSeditorReady() failed` 是因为 2.0 使用此方法作为 before_action .可以简单将 `function JSeditorReady() { return true; }` 添加在 `html-template/index.template.html` 中,或者添加其他逻辑.如果要跨域访问,还需要设置 `allowScriptAccess` 为 `always` (原值为 "sameDomain").
+
 ## 离线模式
 
 ### 舞台大小
@@ -220,7 +224,59 @@ public static const topBarColor_default:int = 0x9C9EA2;
   }
   ```
 
-loadSingleGithubURL
+* 默认角色(官方保留的小猫商标)
+
+  ```shell
+  cd /Applications/Scratch\ 2.app/Contents/Resources/media/libs
+  grep f88bf1935daea28f8ca098462a31dbb0 *
+  > costumeLibrary.json:        "md5": "f88bf1935daea28f8ca098462a31dbb0.svg",
+  ```
+
+  **提示:** 利用 Linux 的 grep 命令查找小猫图片所在文件
+
+  * 修改 `src/scratch/ScratchRuntime.as`
+
+    ```actionscript
+    public function installEmptyProject():void {
+      app.saveForRevert(null, true);
+      app.oldWebsiteURL = '';
+      installProject(new ScratchStage());
+      // 调用 `src/util/ProjectIO.as` 的 `fetchSprite` 方法读取 json 文件加载资源,具体参数参考方法定义;也可以调用 `fetchImage` 方法
+      var io:ProjectIO = new ProjectIO(app);
+      io.fetchSprite('7ec95b5c609c88add22984a3561c98f3.json', addSprite);
+    }
+    /**
+     * 添加角色回调方法
+     **/
+    private function addSprite(costumeOrSprite:*):void {
+      var spr:ScratchSprite;
+      var c:ScratchCostume = costumeOrSprite as ScratchCostume;
+      // 可使用 "Hello" instanceof String 判断
+      if (c) {
+        spr = new ScratchSprite(c.costumeName);
+        spr.setInitialCostume(c);
+        app.addNewSprite(spr);
+        return;
+      }
+      spr = costumeOrSprite as ScratchSprite;
+      if (spr) {
+        app.addNewSprite(spr);
+        return;
+      }
+      // 添加 sprite 的其他造型
+      var list:Array = costumeOrSprite as Array;
+      if (list) {
+        var sprName:String = list[0].costumeName;
+        if (sprName.length > 3) sprName = sprName.slice(0, sprName.length - 2);
+        spr = new ScratchSprite(sprName);
+        for each (c in list) spr.costumes.push(c);
+        if (spr.costumes.length > 1) spr.costumes.shift(); // remove default costume
+        spr.showCostumeNamed(list[0].costumeName);
+        app.addNewSprite(spr);
+      }
+    }
+    ```
+
 ### 添加资源类别
 
 * 将自定义类别添加到 `src/ui/media/MediaLibrary.as` 中
@@ -303,13 +359,109 @@ loadSingleGithubURL
   }
   ```
 
-### 版本发布
+### 添加 / 修改汉化
+
+* 编辑 `locale/zh-cn.po` 文件, 按以下格式添加或修改即可:
+
+  ```yml
+  msgid "%b and %b"
+  msgstr "%b 与 %b"
+  ```
+
+  **提示:** 第一行为程序中需要国际化的字符串(即被替换掉的原字符串,`需要与程序中的字符串完全一致`),第二行为国际化后的字符串(即界面显示字符串).
+
+## 自定义 Block
+
+* 自定义块类型 `src/Specs.as`
+
+  ```actionscript
+  public static const categories:Array = [
+    // [id, category_name, color]
+    [0,  "undefined",   0xD42828],
+    [1,  "Motion",      0x4a6cd4],
+    [2,  "Looks",       0x8a55d7],
+    [3,  "Sound",       0xbb42c3],
+    [4,  "Pen",         0x0e9a6c], // Scratch 1.4: 0x009870
+    [5,  "Events",      0xc88330],
+    [6,  "Control",     0xe1a91a],
+    [7,  "Sensing",     0x2ca5e2],
+    [8,  "Operators",   0x5cb712],
+    [9,  "Data",        variableColor],
+    [10, "More Blocks", procedureColor],
+    [11, "Parameter",   parameterColor],
+    [12, "List",        listColor],
+    [20, "Extension",   extensionsColor],
+  ];
+  ...
+  public static var commands:Array = [
+    // ["specification", "type", "catalog", "callback", "default(optional)"]
+    // type: " " 空字符串表示输入框; "r" 表示文本显示框
+    // catalog: 对应父类 ID,即上述数组第一列
+    // callback: 回调方法,需要在 Primitives.as 中注册
+    // default: 默认值,可选
+    ["link to %s", " ", 8, "href", "http://www.baidu.com"],
+  ]
+  ```
+
+* 添加 / 修改块类型显示 `src/ui/PaletteSelector.as`
+
+  ```actionscript
+  private static const categories:Array = [
+    'Motion', 'Looks', 'Sound', 'Pen', 'Data', // column 1
+    'Events', 'Control', 'Sensing', 'Operators', 'More Blocks']; // column 2
+  ...
+  private function initCategories():void {
+    // (类型)总行数
+    const numberOfRows:int = 5;
+    ...
+  }
+  ```
+
+  运动 | 事件
+
+  外观 | 控制
+
+  声音 | 侦测
+
+  画笔 | 运算
+
+  数据 | 更多
+
+* 添加 / 修改 Block 回调事件 `src/primitives/Primitives.as`
+
+  ```actionscript
+  import flash.net.URLRequest;
+  import flash.net.navigateToURL;
+  import mx.utils.URLUtil;
+  ...
+  public function addPrimsTo(primTable:Dictionary):void {
+    ...
+    primTable["href"] = function(b:*):* {
+      var url:String = interp.arg(b, 0); // 获取 Block 输入参数
+      // 也可使用正则表达式判断并添加逻辑
+      // var pattern:RegExp = /^w*:\/\//i;
+      // var result:Object = pattern.exec(url);
+      if (URLUtil.isHttpURL(url)) {
+        navigateToURL(new URLRequest(url), "_blank")
+      }
+    };
+    ...
+    addOtherPrims(primTable);
+  }
+  ```
+
+  **注意:** 此处数组 `primTable["href"]` 中的 `"href"` 必须与 `src/Specs.as` 注册时的 `callback` 对应,否则无法调用.[Flex 官方文档 - flash.net.navigateToURL](https://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/package.html#navigateToURL())
+
+## 版本发布
 
 * 导出发行版: `FB 顶部菜单` -> `项目` -> `导出发行版...` -> `确定`
 
 * 覆盖旧文件: `cp $HOME/Workspace/scratch/scratch-flash-develop/bin-release/Scratch.swf /Applications/Scratch\ 2.app/Contents/Resources/`
 
 ---
+
+loadSingleGithubURL
+默认角色 f88bf1935daea28f8ca098462a31dbb0.svg
 
 ## Scratch 2.0 editor and player [![Build Status](https://api.travis-ci.org/LLK/scratch-flash.svg?branch=master)](https://travis-ci.org/LLK/scratch-flash)
 

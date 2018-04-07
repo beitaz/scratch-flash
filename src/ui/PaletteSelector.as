@@ -61,6 +61,7 @@ public class PaletteSelector extends Sprite {
 	}
 
 	private function initCategories():void {
+		// 每行显示数量
 		const numberOfRows:int = 5;
 		const w:int = 208;
 		const startY:int = 3;

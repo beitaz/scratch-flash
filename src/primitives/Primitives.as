@@ -25,10 +25,13 @@
 
 package primitives {
 	import flash.utils.Dictionary;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import blocks.*;
 	import interpreter.*;
 	import scratch.ScratchSprite;
 	import translation.Translator;
+	import mx.utils.URLUtil;
 
 public class Primitives {
 
@@ -77,6 +80,16 @@ public class Primitives {
 		primTable["COUNT"]				= function(b:*):* { return counter };
 		primTable["INCR_COUNT"]			= function(b:*):* { counter++ };
 		primTable["CLR_COUNT"]			= function(b:*):* { counter = 0 };
+
+		primTable["href"]			= function(b:*):* {
+			var url:String = interp.arg(b, 0);
+			// 也可使用正则表达式判断并添加逻辑
+			// var pattern:RegExp = /^w*:\/\//i;
+			// var result:Object = pattern.exec(url);
+			if (URLUtil.isHttpURL(url)) {
+				navigateToURL(new URLRequest(url), "_blank")
+			}
+		};
 
 		new LooksPrims(app, interp).addPrimsTo(primTable);
 		new MotionAndPenPrims(app, interp).addPrimsTo(primTable);

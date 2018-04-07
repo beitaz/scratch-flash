@@ -56,6 +56,7 @@ import ui.BlockPalette;
 import ui.RecordingSpecEditor;
 import ui.SharingSpecEditor;
 import ui.media.MediaInfo;
+// import ui.media.MediaLibrary;
 
 import uiwidgets.DialogBox;
 
@@ -771,6 +772,36 @@ public class ScratchRuntime {
 		app.saveForRevert(null, true);
 		app.oldWebsiteURL = '';
 		installProject(new ScratchStage());
+
+		var io:ProjectIO = new ProjectIO(app);
+		io.fetchSprite('7ec95b5c609c88add22984a3561c98f3.json', addSprite);
+	}
+
+	private	function addSprite(costumeOrSprite:*):void {
+		var spr:ScratchSprite;
+		var c:ScratchCostume = costumeOrSprite as ScratchCostume;
+		if (c) {
+			spr = new ScratchSprite(c.costumeName);
+			spr.setInitialCostume(c);
+			app.addNewSprite(spr);
+			return;
+		}
+		spr = costumeOrSprite as ScratchSprite;
+		if (spr) {
+			app.addNewSprite(spr);
+			return;
+		}
+		// 添加 sprite 其他造型
+		var list:Array = costumeOrSprite as Array;
+		if (list) {
+			var sprName:String = list[0].costumeName;
+			if (sprName.length > 3) sprName = sprName.slice(0, sprName.length - 2);
+			spr = new ScratchSprite(sprName);
+			for each (c in list) spr.costumes.push(c);
+			if (spr.costumes.length > 1) spr.costumes.shift(); // remove default costume
+			spr.showCostumeNamed(list[0].costumeName);
+			app.addNewSprite(spr);
+		}
 	}
 
 	public function installNewProject():void {

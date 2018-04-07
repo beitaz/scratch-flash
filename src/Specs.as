@@ -346,6 +346,13 @@ public class Specs {
 		["show variable %m.var",							" ", 9, "showVariable:"],
 		["hide variable %m.var",							" ", 9, "hideVariable:"],
 
+		// 自定义 Block ["block_name", "block_type", "block_catalog", "block_callback", "block_default_value"]
+		// block_type: " " 空字符串表示输入框; "r" 表示文本显示框
+		// block_catalog: 对应注册父类 ID
+		// block_callback: 回调方法,需要在 Primitives.as 中注册
+		// block_default_value: 默认值
+		["link to %s",							" ", 8, "href", "www.baidu.com"],
+
 		// lists
 		["add %s to %m.list",								" ", 12, "append:toList:"],
 		["-"],
