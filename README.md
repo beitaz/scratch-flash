@@ -219,6 +219,47 @@ public static const topBarColor_default:int = 0x9C9EA2;
 * 加载自定义 CDN 资源: 修改 `src/util/Server.as` 中设置 CDN 方法
 
   ```actionscript
+  public function Server() {
+    setDefaultURLs(); // 设置默认 URL
+
+    // 接受来自 flash 变量的 URL 重写
+    try {
+      var urlOverrides:String = Scratch.app.loaderInfo.parameters['urlOverrides'];
+      if (urlOverrides) overrideURLs(by.blooddy.crypto.serialization.JSON.decode(urlOverrides));
+    } catch (e:*) {
+    }
+  }
+
+  /**
+   * No default URLs
+   **/
+  protected function setDefaultURLs():void {}
+
+  /**
+   * 重写 URL 地址
+   **/
+  public function overrideURLs(overrides:Object):void {
+    var forceProtocol:String;
+    var swfURL:String = Scratch.app.loaderInfo.url;
+    if (swfURL && URLUtil.isHttpURL(swfURL)) { // "isHttpURL" is true if the protocol is either HTTP or HTTPS
+      forceProtocol = URLUtil.getProtocol(swfURL);
+    }
+    for (var name:String in overrides) {
+      if (overrides.hasOwnProperty(name)) {
+        var url:String = overrides[name];
+
+        if (forceProtocol && URLUtil.isHttpURL(url)) {
+          url = URLUtil.replaceProtocol(url, forceProtocol);
+        }
+
+        URLs[name] = url;
+      }
+    }
+  }
+
+  /**
+   * 获取 CDN 静态资源 URL
+   **/
   protected function getCdnStaticSiteURL():String {
     return URLs.siteCdnPrefix + URLs.staticFiles;
   }
@@ -226,13 +267,13 @@ public static const topBarColor_default:int = 0x9C9EA2;
 
 * 默认角色(官方保留的小猫商标)
 
+  * 利用 Linux 的 grep 命令查找小猫图片所在文件
+
   ```shell
-  cd /Applications/Scratch\ 2.app/Contents/Resources/media/libs
-  grep f88bf1935daea28f8ca098462a31dbb0 *
+  $ cd /Applications/Scratch\ 2.app/Contents/Resources/media/libs
+  $ grep f88bf1935daea28f8ca098462a31dbb0 *
   > costumeLibrary.json:        "md5": "f88bf1935daea28f8ca098462a31dbb0.svg",
   ```
-
-  **提示:** 利用 Linux 的 grep 命令查找小猫图片所在文件
 
   * 修改 `src/scratch/ScratchRuntime.as`
 
