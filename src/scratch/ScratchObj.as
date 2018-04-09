@@ -30,15 +30,15 @@ package scratch {
 
 	import flash.display.*;
 	import flash.events.MouseEvent;
-import flash.geom.ColorTransform;
-import flash.utils.*;
+	import flash.geom.ColorTransform;
+	import flash.utils.*;
 
 	import interpreter.*;
 
 	import scratch.ScratchComment;
-import scratch.ScratchSprite;
+	import scratch.ScratchSprite;
 
-import translation.Translator;
+	import translation.Translator;
 
 	import util.*;
 

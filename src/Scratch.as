@@ -213,6 +213,7 @@ public class Scratch extends Sprite {
 
 		setEditMode(startInEditMode());
 
+		// 编辑模式初始化新项目,否则初始化空项目
 		// install project before calling fixLayout()
 		if (editMode) runtime.installNewProject();
 		else runtime.installEmptyProject();

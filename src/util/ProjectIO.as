@@ -473,9 +473,9 @@ public class ProjectIO {
 		// Fetch a sprite with the md5 hash.
 		function jsonReceived(data:ByteArray):void {
 			if (!data) return;
-			spr.readJSON(util.JSON.parse(data.readUTFBytes(data.length)));
-			spr.instantiateFromJSON(app.stagePane);
-			fetchSpriteAssets([spr], assetsReceived);
+			spr.readJSON(util.JSON.parse(data.readUTFBytes(data.length))); // 解析 *.json 文件
+			spr.instantiateFromJSON(app.stagePane); // 将 *.json 数据实例化为对应的对象( sound, costume, script )
+			fetchSpriteAssets([spr], assetsReceived); // 获取角色资源
 		}
 		function assetsReceived(assetDict:Object):void {
 			installAssets([spr], assetDict);

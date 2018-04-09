@@ -284,7 +284,7 @@ public static const topBarColor_default:int = 0x9C9EA2;
       installProject(new ScratchStage());
       // 调用 `src/util/ProjectIO.as` 的 `fetchSprite` 方法读取 json 文件加载资源,具体参数参考方法定义;也可以调用 `fetchImage` 方法
       var io:ProjectIO = new ProjectIO(app);
-      io.fetchSprite('7ec95b5c609c88add22984a3561c98f3.json', addSprite);
+      io.fetchSprite('project.json', addSprite);
     }
     /**
      * 添加角色回调方法

@@ -768,14 +768,31 @@ public class ScratchRuntime {
 	// Project Loading and Installing
 	//------------------------------
 
+	/**
+	 * 清空并初始化新项目
+	 **/
 	public function installEmptyProject():void {
+		// function loaderCompleteHandler(e:Event):void {
+		// 	var dataObj:Object = util.JSON.parse(URLLoader(e.target).data);
+		// 	installProjectFromFile(fileName, e.target.data);
+		// }
 		app.saveForRevert(null, true);
 		app.oldWebsiteURL = '';
 		installProject(new ScratchStage());
 
+		// 通过  File 加载默认的空项目文件
 		var io:ProjectIO = new ProjectIO(app);
-		io.fetchSprite('7ec95b5c609c88add22984a3561c98f3.json', addSprite);
+		io.fetchSprite('project.json', addSprite);
+		// var fileName:String = "project.json";
+		// var file:String = "media/" + fileName;
+		// var data:ByteArray;
+		// var loader:URLLoader = new URLLoader();
+		// loader.dataFormat = URLLoaderDataFormat.BINARY;
+		// loader.addEventListener(Event.COMPLETE, loaderCompleteHandler);
+		// loader.load(new URLRequest(file));
 	}
+
+	
 
 	private	function addSprite(costumeOrSprite:*):void {
 		var spr:ScratchSprite;
@@ -903,8 +920,16 @@ public class ScratchRuntime {
 		});
 		app.installStage(project);
 		app.updateSpriteLibrary(true);
+		// 添加默认角色
+		// var defaultSpriteSVG:DisplayObject = Resources.createDO('defaultSprite');
+		// var defaultSprite:ScratchSprite = defaultSpriteSVG as ScratchSprite;
+		// addSprite(defaultSprite);
+		// app.addNewSprite(defaultSprite);
+		// var io:ProjectIO = new ProjectIO(app);
+		// io.fetchSprite('7ec95b5c609c88add22984a3561c98f3.json', addSprite);
 		// set the active sprite
 		var allSprites:Array = app.stagePane.sprites();
+		// allSprites.push(defaultSprite);
 		if (allSprites.length > 0) {
 			allSprites = allSprites.sortOn('indexInLibrary');
 			app.selectSprite(allSprites[0]);
